@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marisss Team</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #7c3aed;
+      --accent2: #a855f7;
+      --glow: rgba(124,58,237,0.35);
+      --card-bg: rgba(18,18,28,0.85);
+      --border: rgba(255,255,255,0.07);
+      --text: #f0f0ff;
+      --muted: #8b8ba0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #07070f;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.4);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #c084fc;
+      margin-bottom: 1.2rem;
+    }
+    .badge::before { content: "●"; font-size: 8px; animation: pulse 1.6s ease infinite; }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: .7rem;
+      background: linear-gradient(135deg, #fff 30%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 980px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, border-color .25s;
+      backdrop-filter: blur(12px);
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 20px 60px var(--glow);
+      border-color: rgba(124,58,237,0.5);
+    }
+
+    .card-thumb-wrap {
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+    }
+
+    .card:hover .card-thumb-wrap img {
+      transform: scale(1.06);
+    }
+
+    .card-thumb-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 70px;
+      background: linear-gradient(to top, rgba(10,10,20,.9) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .card-body { padding: 1.2rem 1.3rem 1.4rem; }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: .6rem;
+    }
+
+    .gag .card-tag  { background: rgba(20,184,166,.18); color: #5eead4; border: 1px solid rgba(20,184,166,.35); }
+    .mm2 .card-tag  { background: rgba(124,58,237,.18); color: #c084fc; border: 1px solid rgba(124,58,237,.35); }
+    .sab .card-tag  { background: rgba(233,69,96,.18);  color: #fb7185; border: 1px solid rgba(233,69,96,.35);  }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: .35rem;
+      color: #fff;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+    }
+
+    .card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: filter .2s, transform .15s;
+    }
+    .card-btn:active { transform: scale(.97); }
+    .card-btn:hover { filter: brightness(1.12); }
+
+    .gag .card-btn  { background: linear-gradient(90deg,#059669,#14b8a6); color: #fff; }
+    .mm2 .card-btn  { background: linear-gradient(90deg,#6d28d9,#a855f7); color: #fff; }
+    .sab .card-btn  { background: linear-gradient(90deg,#be123c,#e94560); color: #fff; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: #10101c;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 540px;
+      overflow: hidden;
+      transform: translateY(20px) scale(.97);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-banner {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-inner { padding: 1.5rem 1.6rem 1.7rem; }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .modal-title { font-size: 17px; font-weight: 800; color: #fff; }
+
+    .close-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+      line-height: 1;
+    }
+    .close-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+    .modal-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+
+    .script-box {
+      background: #07070f;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #a5f3fc;
+      word-break: break-all;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      user-select: all;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 11px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all .2s;
+    }
+
+    .copy-btn.idle    { background: linear-gradient(90deg,#6d28d9,#a855f7); color: #fff; }
+    .copy-btn.success { background: linear-gradient(90deg,#059669,#10b981); color: #fff; }
+    .copy-btn:hover { filter: brightness(1.1); }
+    .copy-btn:active { transform: scale(.98); }
+
+    .footer {
+      margin-top: 3.5rem;
+      text-align: center;
+      font-size: 12px;
+      color: #3d3d55;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="page">
+  <div class="badge">Roblox Script Hub</div>
+  <h1>MARIS TEAM</h1>
+  <p class="subtitle">Select a game to get the script — copy with one click, paste into your executor.</p>
+
+  <div class="grid">
+
+    <!-- Grow A Garden 2 -->
+    <div class="card gag" onclick="openModal('gag')">
+      <div class="card-thumb-wrap">
+        <img
+          src="https://tr.rbxcdn.com/180DAY-d3506c96f41fb1085677cfc175c2bad3/768/432/Image/Webp/noFilter"
+          alt="Grow A Garden 2"
+          loading="lazy"
+        />
+      </div>
+      <div class="card-body">
+        <span class="card-tag">Simulator</span>
+        <div class="card-title">Grow A Garden 2</div>
+        <p class="card-desc">Auto farm, auto collect, speed hack and many other powerful features.</p>
+        <button class="card-btn">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4M12 5v11M5 19h14"/></svg>
+          Get Script
+        </button>
+      </div>
+    </div>
+
+    <!-- Grow A Garden -->
+    <div class="card mm2" onclick="openModal('mm2')">
+      <div class="card-thumb-wrap">
+        <img
+          src="https://i.ibb.co/hx3CvSym/2a-Obo-Qdie-KJrh1-CKr-Nuk-Be-Fak8l5nf-Nwp-DV8-WMoi-1.jpg"
+          alt="Grow A Garden "
+          loading="lazy"
+        />
+      </div>
+      <div class="card-body">
+        <span class="card-tag">Mystery</span>
+        <div class="card-title">Grow A Garden </div>
+        <p class="card-desc">Auto farm, auto collect, speed hack and many other powerful features.</p>
+        <button class="card-btn">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4M12 5v11M5 19h14"/></svg>
+          Get Script
+        </button>
+      </div>
+    </div>
+
+    <!-- Steal A Brainrot -->
+    <div class="card sab" onclick="openModal('sab')">
+      <div class="card-thumb-wrap">
+        <img
+          src="https://tr.rbxcdn.com/180DAY-30a62664e838df470ec079b7fc171637/768/432/Image/Webp/noFilter"
+          alt="Steal A Brainrot"
+          loading="lazy"
+        />
+      </div>
+      <div class="card-body">
+        <span class="card-tag">Tycoon</span>
+        <div class="card-title">Steal A Brainrot</div>
+        <p class="card-desc">Auto trade, auto steal, dupe items and a built-in Discord notification system.</p>
+        <button class="card-btn">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M8 9l4-4 4 4M12 5v11M5 19h14"/></svg>
+          Get Script
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">Made by MARIS TEAM &nbsp;·&nbsp; Paste into your executor and hit Execute</div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <img class="modal-banner" id="modal-banner" src="" alt="" />
+    <div class="modal-inner">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title"></span>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-label">Script — copy &amp; paste into your executor</div>
+      <div class="script-box" id="script-text"></div>
+      <button class="copy-btn idle" id="copy-btn" onclick="copyScript()">
+        <svg id="copy-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span id="copy-label">Copy Script</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = Array.from({length: 130}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + .3,
+      a: Math.random() * Math.PI * 2,
+      speed: Math.random() * .004 + .002
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.a += s.speed;
+      const alpha = (Math.sin(s.a) * .5 + .5) * .7 + .1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,190,255,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  drawStars();
+
+  const scripts = {
+    gag: {
+      title: '🌱 Grow A Garden 2',
+      img: 'https://tr.rbxcdn.com/180DAY-d3506c96f41fb1085677cfc175c2bad3/768/432/Image/Webp/noFilter',
+      code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/marisroblox/maristeam/refs/heads/main/gag2"))()'
+    },
+    mm2: {
+      title: '🔪 Grow A Garden',
+      img: 'https://i.ibb.co/hx3CvSym/2a-Obo-Qdie-KJrh1-CKr-Nuk-Be-Fak8l5nf-Nwp-DV8-WMoi-1.jpg',
+      code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/marisroblox/maristeam/refs/heads/main/gag"))()'
+    },
+    sab: {
+      title: '🧠 Steal A Brainrot',
+      img: 'https://tr.rbxcdn.com/180DAY-30a62664e838df470ec079b7fc171637/768/432/Image/Webp/noFilter',
+      code: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/marisroblox/maristeam/refs/heads/main/sab"))()'
+    }
+  };
+
+  let copyTimer = null;
+
+  function openModal(key) {
+    const d = scripts[key];
+    document.getElementById('modal-title').textContent = d.title;
+    document.getElementById('modal-banner').src = d.img;
+    document.getElementById('modal-banner').alt = d.title;
+    document.getElementById('script-text').textContent = d.code;
+    resetCopyBtn();
+    document.getElementById('overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    if (copyTimer) clearTimeout(copyTimer);
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('overlay')) closeModal();
+  }
+
+  function copyScript() {
+    const text = document.getElementById('script-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn   = document.getElementById('copy-btn');
+      const label = document.getElementById('copy-label');
+      const icon  = document.getElementById('copy-icon');
+      btn.classList.replace('idle', 'success');
+      label.textContent = 'Copied!';
+      icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>';
+      if (copyTimer) clearTimeout(copyTimer);
+      copyTimer = setTimeout(resetCopyBtn, 2500);
+    }).catch(() => {
+      alert('Copy failed — please select the text and copy manually!');
+    });
+  }
+
+  function resetCopyBtn() {
+    const btn   = document.getElementById('copy-btn');
+    const label = document.getElementById('copy-label');
+    const icon  = document.getElementById('copy-icon');
+    btn.classList.replace('success', 'idle');
+    label.textContent = 'Copy Script';
+    icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
